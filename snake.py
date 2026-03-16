@@ -15,7 +15,9 @@ WIDTH=40
 HEIGHT=20
 SNAKE_CHAR="🐍"
 FOOD_CHAR="🍎"
-DELAY=0.1
+# Base delays (seconds)
+V_DELAY=0.1  # vertical movement delay
+H_DELAY=0.05 # faster horizontal movement
 
 def draw_border(win):
     for x in range(WIDTH+2):
@@ -34,7 +36,8 @@ def place_food(snake):
 def main(stdscr):
     curses.curs_set(0)
     stdscr.nodelay(True)
-    stdscr.timeout(int(DELAY*1000))
+    # initial timeout based on vertical delay
+    stdscr.timeout(int(V_DELAY*1000))
     snake=[(HEIGHT//2,WIDTH//2-1),(HEIGHT//2,WIDTH//2),(HEIGHT//2,WIDTH//2+1)]
     direction=(0,1)
     food=place_food(snake)
@@ -46,8 +49,11 @@ def main(stdscr):
         elif key in ("KEY_LEFT","a"): direction=(0,-1)
         elif key in ("KEY_RIGHT","d"): direction=(0,1)
         elif key in ("q","Q"): break
-        hy,hx=snake[-1]
+        # Adjust timeout: faster when moving horizontally
         dy,dx=direction
+        if dx!=0: stdscr.timeout(int(H_DELAY*1000))
+        else: stdscr.timeout(int(V_DELAY*1000))
+        hy,hx=snake[-1]
         nh=(hy+dy,hx+dx)
         if nh[0]<1 or nh[0]>HEIGHT or nh[1]<1 or nh[1]>WIDTH or nh in snake:
             stdscr.addstr(HEIGHT//2,WIDTH//2-5,"HISS! ☠️")
